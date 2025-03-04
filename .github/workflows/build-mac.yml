@@ -1,0 +1,30 @@
+name: Build macOS .app
+
+on: [push]  # Startet automatisch, wenn Code in das Repository hochgeladen wird
+
+jobs:
+  build:
+    runs-on: macos-latest  # Nutzt GitHub's macOS-Server
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Installiere Python-Abhängigkeiten
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt || true  # Falls requirements.txt vorhanden ist
+
+      - name: Baue die macOS .app
+        run: |
+          source venv/bin/activate
+          pyinstaller --onefile --windowed move_files.py  # Erstellt die .app-Datei
+
+      - name: Lade die .app als Download hoch
+        uses: actions/upload-artifact@v3
+        with:
+          name: mac-app
+          path: dist/move_files.app  # Die erstellte App als Download bereitstellen
