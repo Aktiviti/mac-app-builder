@@ -23,12 +23,18 @@ jobs:
           source venv/bin/activate
           pyinstaller --onefile --windowed move_files.py  # Erstellt die .app-Datei
 
+      - name: Erstelle .dmg-Datei
+        run: |
+          hdiutil create -volname "Meine App" -srcfolder dist/move_files.app -ov -format UDZO dist/move_files.dmg
+
       - name: Lade die .app als Download hoch
-        uses: actions/upload-artifact@v4  # NEUESTE VERSION VERWENDEN
+        uses: actions/upload-artifact@v4
         with:
           name: mac-app
           path: dist/move_files.app  # Die erstellte App als Download bereitstellen
 
-- name: Erstelle .dmg-Datei
-  run: |
-    hdiutil create -volname "Meine App" -srcfolder dist/move_files.app -ov -format UDZO dist/move_files.dmg
+      - name: Lade die .dmg als Download hoch
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-dmg
+          path: dist/move_files.dmg  # Die .dmg-Datei bereitstellen
