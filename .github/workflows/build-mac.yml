@@ -28,3 +28,7 @@ jobs:
         with:
           name: mac-app
           path: dist/move_files.app  # Die erstellte App als Download bereitstellen
+
+- name: Erstelle .dmg-Datei
+  run: |
+    hdiutil create -volname "Meine App" -srcfolder dist/move_files.app -ov -format UDZO dist/move_files.dmg
