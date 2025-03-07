@@ -14,7 +14,7 @@ jobs:
         run: |
           python3 -m venv venv
           echo "Python venv erstellt."
-          source venv/bin/activate
+          source venv/bin/activate || source venv/bin/activate.fish || source venv/Scripts/activate
           echo "Venv aktiviert."
           pip install --upgrade pip
           pip install pyinstaller
@@ -23,7 +23,8 @@ jobs:
       - name: Baue die macOS .app für Intel & Apple Silicon (M1/M2/M3)
         run: |
           source venv/bin/activate
-          pyinstaller --onefile --windowed --target-arch universal2 move_files.py
+          arch -arm64 pyinstaller --onefile --windowed --target-arch universal2 \
+            --add-binary /Library/Frameworks/Python.framework/Versions/3.11/Python:. move_files.py
 
       - name: Signiere die App (Gatekeeper-Fix)
         run: |
@@ -31,7 +32,12 @@ jobs:
 
       - name: Erstelle .dmg-Datei
         run: |
-          hdiutil create -volname "Meine App" -srcfolder dist/move_files.app -ov -format UDZO dist/move_files.dmg
+          if [ -d "dist/move_files.app" ]; then
+            hdiutil create -volname "Meine App" -srcfolder dist/move_files.app -ov -format UDZO dist/move_files.dmg
+          else
+            echo "Fehler: move_files.app wurde nicht erstellt."
+            exit 1
+          fi
 
       - name: Lade die .app als Download hoch
         uses: actions/upload-artifact@v4
