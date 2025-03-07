@@ -10,16 +10,15 @@ jobs:
       - name: Repository auschecken
         uses: actions/checkout@v4
 
-      - name: Installiere Universal-Python
+      - name: Installiere Universal-Python von Python.org
         run: |
-          brew uninstall --ignore-dependencies python
-          arch -arm64 brew install python
-          arch -x86_64 brew install python
+          curl -o python.pkg https://www.python.org/ftp/python/3.11.6/python-3.11.6-macos11.pkg
+          sudo installer -pkg python.pkg -target /
 
       - name: Erstelle universelle virtuelle Umgebung
         run: |
           rm -rf venv
-          arch -arm64 python3 -m venv venv
+          /usr/local/bin/python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install pyinstaller
@@ -28,7 +27,7 @@ jobs:
       - name: Baue die macOS .app für Intel & Apple Silicon (M1/M2/M3)
         run: |
           source venv/bin/activate
-          arch -arm64 pyinstaller --onefile --windowed --target-arch universal2 move_files.py
+          pyinstaller --onefile --windowed --target-arch universal2 move_files.py
 
       - name: Signiere die App (Gatekeeper-Fix)
         run: |
