@@ -1,6 +1,6 @@
 name: Build macOS .app
 
-on: [push]  # Startet automatisch, wenn Code in das Repository hochgeladen wird
+on: [push]  # Startet automatisch bei einem neuen Commit
 
 jobs:
   build:
@@ -8,21 +8,22 @@ jobs:
 
     steps:
       - name: Repository auschecken
-        uses: actions/checkout@v4  # Nutzt die neueste Version
+        uses: actions/checkout@v4
 
-      - name: Installiere Python-Abhängigkeiten
+      - name: Erstelle virtuelle Umgebung & installiere Abhängigkeiten
         run: |
           python3 -m venv venv
+          echo "Python venv erstellt."
           source venv/bin/activate
+          echo "Venv aktiviert."
           pip install --upgrade pip
           pip install pyinstaller
-          pip install -r requirements.txt || true  # Falls requirements.txt vorhanden ist
+          pip install -r requirements.txt || echo "Keine requirements.txt vorhanden."
 
       - name: Baue die macOS .app für Intel & Apple Silicon (M1/M2/M3)
         run: |
           source venv/bin/activate
-          pyinstaller --onefile --windowed --target-arch universal2 \
-          --hidden-import=<modulname> move_files.py  # Falls zusätzliche Abhängigkeiten fehlen
+          pyinstaller --onefile --windowed --target-arch universal2 move_files.py
 
       - name: Signiere die App (Gatekeeper-Fix)
         run: |
@@ -36,10 +37,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mac-app
-          path: dist/move_files.app  # Die erstellte App als Download bereitstellen
+          path: dist/move_files.app
 
       - name: Lade die .dmg als Download hoch
         uses: actions/upload-artifact@v4
         with:
           name: mac-dmg
-          path: dist/move_files.dmg  # Die .dmg-Datei bereitstellen
+          path: dist/move_files.dmg
