@@ -10,12 +10,17 @@ jobs:
       - name: Repository auschecken
         uses: actions/checkout@v4
 
-      - name: Erstelle virtuelle Umgebung & installiere Abhängigkeiten
+      - name: Installiere richtige Python-Version
         run: |
+          brew uninstall --force python
+          arch -arm64 brew install python
+          arch -x86_64 brew install python
+
+      - name: Erstelle universelle virtuelle Umgebung
+        run: |
+          rm -rf venv
           python3 -m venv venv
-          echo "Python venv erstellt."
-          source venv/bin/activate || source venv/bin/activate.fish || source venv/Scripts/activate
-          echo "Venv aktiviert."
+          source venv/bin/activate
           pip install --upgrade pip
           pip install pyinstaller
           pip install -r requirements.txt || echo "Keine requirements.txt vorhanden."
@@ -24,7 +29,7 @@ jobs:
         run: |
           source venv/bin/activate
           arch -arm64 pyinstaller --onefile --windowed --target-arch universal2 \
-            --add-binary /Library/Frameworks/Python.framework/Versions/3.11/Python:. move_files.py
+            --add-binary /opt/homebrew/Frameworks/Python.framework/Versions/3.13/Python:. move_files.py
 
       - name: Signiere die App (Gatekeeper-Fix)
         run: |
