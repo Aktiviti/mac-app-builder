@@ -1,22 +1,22 @@
 name: Build macOS .app
 
-on: [push]  # Startet automatisch bei einem neuen Commit
+on: [push]
 
 jobs:
   build:
-    runs-on: macos-latest  # Nutzt GitHub's macOS-Server
+    runs-on: macos-latest
 
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v4
 
-      - name: Installiere richtige Python-Version
+      - name: Installiere richtige Universal-Python-Version
         run: |
-          brew uninstall --force python
-          arch -arm64 brew install python
-          arch -x86_64 brew install python
+          brew install python
+          echo "Verfügbare Python-Versionen:"
+          python3 --version
 
-      - name: Erstelle universelle virtuelle Umgebung
+      - name: Erstelle virtuelle Umgebung mit Universal-Python
         run: |
           rm -rf venv
           python3 -m venv venv
@@ -28,8 +28,7 @@ jobs:
       - name: Baue die macOS .app für Intel & Apple Silicon (M1/M2/M3)
         run: |
           source venv/bin/activate
-          arch -arm64 pyinstaller --onefile --windowed --target-arch universal2 \
-            --add-binary /opt/homebrew/Frameworks/Python.framework/Versions/3.13/Python:. move_files.py
+          arch -arm64 pyinstaller --onefile --windowed --target-arch universal2 move_files.py
 
       - name: Signiere die App (Gatekeeper-Fix)
         run: |
