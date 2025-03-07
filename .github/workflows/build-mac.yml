@@ -8,7 +8,7 @@ jobs:
 
     steps:
       - name: Repository auschecken
-        uses: actions/checkout@v4  # Aktuelle Version verwenden
+        uses: actions/checkout@v4  # Nutzt die neueste Version
 
       - name: Installiere Python-Abhängigkeiten
         run: |
@@ -18,10 +18,15 @@ jobs:
           pip install pyinstaller
           pip install -r requirements.txt || true  # Falls requirements.txt vorhanden ist
 
-      - name: Baue die macOS .app
+      - name: Baue die macOS .app für Intel & Apple Silicon (M1/M2/M3)
         run: |
           source venv/bin/activate
-          pyinstaller --onefile --windowed move_files.py  # Erstellt die .app-Datei
+          pyinstaller --onefile --windowed --target-arch universal2 \
+          --hidden-import=<modulname> move_files.py  # Falls zusätzliche Abhängigkeiten fehlen
+
+      - name: Signiere die App (Gatekeeper-Fix)
+        run: |
+          codesign --force --deep --sign - dist/move_files.app
 
       - name: Erstelle .dmg-Datei
         run: |
