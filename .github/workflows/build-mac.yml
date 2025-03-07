@@ -1,6 +1,6 @@
 name: Build macOS .app
 
-on: [push]
+on: [push]  # Startet automatisch bei einem neuen Commit
 
 jobs:
   build:
@@ -10,16 +10,16 @@ jobs:
       - name: Repository auschecken
         uses: actions/checkout@v4
 
-      - name: Installiere richtige Universal-Python-Version
+      - name: Installiere Universal-Python
         run: |
-          brew install python
-          echo "Verfügbare Python-Versionen:"
-          python3 --version
+          brew uninstall --ignore-dependencies python
+          arch -arm64 brew install python
+          arch -x86_64 brew install python
 
-      - name: Erstelle virtuelle Umgebung mit Universal-Python
+      - name: Erstelle universelle virtuelle Umgebung
         run: |
           rm -rf venv
-          python3 -m venv venv
+          arch -arm64 python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install pyinstaller
